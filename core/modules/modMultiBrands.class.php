@@ -1,12 +1,12 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.1.0
+/* MultiBrands Module for Dolibarr - v1.1.1
  * http://www.atlasbase.net
  */
 
 /**
  * \file    multi-brands/core/modules/modMultiBrands.class.php
  * \ingroup multi-brands
- * \brief   MultiBrands module descriptor v1.1.0
+ * \brief   MultiBrands module descriptor v1.1.1
  */
 
 require_once DOL_DOCUMENT_ROOT.'/core/modules/DolibarrModules.class.php';
@@ -25,7 +25,7 @@ class modMultiBrands extends DolibarrModules
         $this->name = preg_replace('/^mod/i', '', get_class($this));
         $this->description = "Issue quotations and documents under multiple brands / DBAs from a single company";
         $this->descriptionlong = "Define multiple brand identities (logo, name, colors, address, legal text) and dynamically apply them to proposals, invoices, orders and other PDF documents based on a custom field selection.";
-        $this->version = '1.1.0';
+        $this->version = '1.1.1';
         $this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
         $this->picto = 'label';
 
@@ -173,6 +173,12 @@ class modMultiBrands extends DolibarrModules
 
         $this->addExtrafields();
 
+        // Clear extrafields cache so new/updated fields appear immediately
+        $cacheFile = DOL_DATA_ROOT.'/extrafields/cache_' . $conf->entity . '.json';
+        if (file_exists($cacheFile)) {
+            @unlink($cacheFile);
+        }
+
         return $this->_init($sql, $options);
     }
 
@@ -192,27 +198,46 @@ class modMultiBrands extends DolibarrModules
         );
 
         foreach ($targets as $element => $label) {
-            $result = $extrafields->addExtraField(
-                'brand_code',
-                $label,
-                'sellist',
-                1,
-                '',
-                $element,
-                0,
-                0,
-                '',
-                $param,
-                1,
-                '',
-                '',
-                0,
-                '',
-                '',
-                'multibrands@multi-brands'
-            );
-            if ($result < 0) {
-                dol_syslog('MultiBrands::addExtrafields error for '.$element.': '.$extrafields->error, LOG_ERR);
+            // Check if extrafield already exists
+            $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."extrafields"
+                ." WHERE name = 'brand_code' AND elementtype = '".$this->db->escape($element)."'";
+            $resql = $this->db->query($sql);
+            $exists = ($resql && $this->db->num_rows($resql) > 0);
+
+            if ($exists) {
+                // Force update param to ensure the sellist query is correct
+                $sqlUpdate = "UPDATE ".MAIN_DB_PREFIX."extrafields"
+                    ." SET param = '".$this->db->escape(json_encode($param))."',"
+                    ." type = 'sellist',"
+                    ." label = '".$this->db->escape($label)."'"
+                    ." WHERE name = 'brand_code' AND elementtype = '".$this->db->escape($element)."'";
+                $resUpdate = $this->db->query($sqlUpdate);
+                if (!$resUpdate) {
+                    dol_syslog('MultiBrands::addExtrafields update error for '.$element.': '.$this->db->lasterror(), LOG_ERR);
+                }
+            } else {
+                $result = $extrafields->addExtraField(
+                    'brand_code',
+                    $label,
+                    'sellist',
+                    1,
+                    '',
+                    $element,
+                    0,
+                    0,
+                    '',
+                    $param,
+                    1,
+                    '',
+                    '',
+                    0,
+                    '',
+                    '',
+                    'multibrands@multi-brands'
+                );
+                if ($result < 0) {
+                    dol_syslog('MultiBrands::addExtrafields error for '.$element.': '.$extrafields->error, LOG_ERR);
+                }
             }
         }
     }

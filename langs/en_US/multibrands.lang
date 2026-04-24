@@ -73,3 +73,9 @@ Missing = Missing
 PhpUploadMaxFilesize = PHP upload_max_filesize
 PhpPostMaxSize = PHP post_max_size
 LogoFileMissing = Logo file missing on disk
+
+HowToUse = How to use MultiBrands
+HowToUseStep1 = 1. Create brands below (logo, company name, colors, etc.)
+HowToUseStep2 = 2. Go to a Thirdparty card → "Additional attributes" tab → set a Default Brand
+HowToUseStep3 = 3. Go to a Proposal/Invoice/Order card → "Additional attributes" tab → pick a Brand
+HowToUseStep4 = 4. Generate PDF with the branded template (e.g. azur_branded) — the brand identity will be applied automatically

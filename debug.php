@@ -1,5 +1,5 @@
 <?php
-/* MultiBrands Module Diagnostic Tool - v1.1.0
+/* MultiBrands Module Diagnostic Tool - v1.1.1
  * Place this file in your Dolibarr root and access via browser.
  * It will try to locate the multi-brands module and report status.
  */
@@ -34,7 +34,7 @@ if (php_sapi_name() !== 'cli'
     </style>
 </head>
 <body>
-<h1>MultiBrands Module Diagnostic v1.1.0</h1>
+<h1>MultiBrands Module Diagnostic v1.1.1</h1>
 
 <?php
 function test($label, $condition, $errorMsg = '') {
@@ -230,6 +230,6 @@ if (!empty($logFile) && file_exists($logFile) && is_readable($logFile)) {
 ?>
 
 <hr>
-<p style="color:#888;">MultiBrands Diagnostic v1.1.0 — If this page loads, PHP is working. If sections show errors, those are your clues.</p>
+<p style="color:#888;">MultiBrands Diagnostic v1.1.1 — If this page loads, PHP is working. If sections show errors, those are your clues.</p>
 </body>
 </html>

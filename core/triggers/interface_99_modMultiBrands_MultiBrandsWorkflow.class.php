@@ -1,5 +1,5 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.1.0
+/* MultiBrands Module for Dolibarr - v1.1.1
  * http://www.atlasbase.net
  */
 
@@ -14,7 +14,7 @@ class InterfaceMultiBrandsWorkflow extends DolibarrTriggers
     public $name = 'MultiBrandsWorkflow';
     public $family = 'multi-brands';
     public $description = "Auto-assign brand to proposals, invoices, orders from thirdparty default";
-    public $version = '1.1.0';
+    public $version = '1.1.1';
     public $picto = 'label';
     // Handled events: PROPAL_CREATE, PROPAL_MODIFY, FACTURE_CREATE, FACTURE_MODIFY, COMMANDE_CREATE, COMMANDE_MODIFY
 

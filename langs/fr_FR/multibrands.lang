@@ -73,3 +73,9 @@ Missing = Manquant
 PhpUploadMaxFilesize = PHP upload_max_filesize
 PhpPostMaxSize = PHP post_max_size
 LogoFileMissing = Fichier logo manquant sur le disque
+
+HowToUse = Comment utiliser MultiBrands
+HowToUseStep1 = 1. Créez des marques ci-dessous (logo, nom de société, couleurs, etc.)
+HowToUseStep2 = 2. Allez sur la fiche d'un Tiers → onglet "Attributs complémentaires" → définissez une Marque par défaut
+HowToUseStep3 = 3. Allez sur une Proposition/Facture/Commande → onglet "Attributs complémentaires" → choisissez une Marque
+HowToUseStep4 = 4. Générez le PDF avec le modèle de marque (ex. azur_branded) — l'identité de marque sera appliquée automatiquement

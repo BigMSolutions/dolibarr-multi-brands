@@ -1,5 +1,5 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.1.0
+/* MultiBrands Module for Dolibarr - v1.1.1
  * http://www.atlasbase.net
  *
  * This program is free software; you can redistribute it and/or modify
@@ -431,6 +431,17 @@ if ($action == 'create' || $action == 'edit') {
 
     print '</form>';
 } else {
+    // HOW TO USE INFO BOX
+    print '<div class="fichecenter">';
+    print '<div class="info clearboth">';
+    print '<strong>'.$langs->trans("HowToUse").'</strong><br>';
+    print $langs->trans("HowToUseStep1").'<br>';
+    print $langs->trans("HowToUseStep2").'<br>';
+    print $langs->trans("HowToUseStep3").'<br>';
+    print $langs->trans("HowToUseStep4");
+    print '</div>';
+    print '</div><br>';
+
     // DIAGNOSTIC PANEL
     print '<div class="fichecenter">';
     print '<div class="div-table-responsive">';
