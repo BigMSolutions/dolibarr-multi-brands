@@ -1,0 +1,15 @@
+id: multi-brands
+name: MultiBrands
+version: 1.1.0
+description: Issue quotations and documents under multiple brands / DBAs from a single company
+descriptionlong: Define multiple brand identities (logo, name, colors, address, legal text) and dynamically apply them to proposals, invoices, orders and other PDF documents based on a custom field selection.
+author: atlasbase.net
+date: 2024-01-01
+family: products
+module_position: 90
+url: http://www.atlasbase.net
+license: GPL-3+
+editor_name: atlasbase.net
+editor_url: http://www.atlasbase.net
+depends:
+  - modSociete
