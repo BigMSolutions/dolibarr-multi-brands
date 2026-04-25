@@ -76,6 +76,7 @@ LogoFileMissing = Logo file missing on disk
 RepairExtrafields = Repair Extrafields
 ExtrafieldsRepaired = Extrafields repaired successfully
 ExtrafieldsRepairFailed = Failed to repair some extrafields
+PdfModelsFailed = Failed to generate some PDF model files
 
 HowToUse = How to use MultiBrands
 HowToUseStep1 = 1. Create brands below (logo, company name, colors, etc.)

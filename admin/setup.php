@@ -1,5 +1,5 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.1.2
+/* MultiBrands Module for Dolibarr - v1.1.3
  * http://www.atlasbase.net
  *
  * This program is free software; you can redistribute it and/or modify
@@ -160,6 +160,11 @@ if ($action == 'add') {
         if (!$error) {
             $result = $brand->create($user);
             if ($result > 0) {
+                // Generate PDF model classes for this brand
+                $pdfResult = $brand->generatePdfModels();
+                if (!empty($pdfResult['failed'])) {
+                    setEventMessages($langs->trans("PdfModelsFailed").': '.implode(', ', $pdfResult['failed']), null, 'warnings');
+                }
                 setEventMessages($langs->trans("BrandCreated"), null, 'mesgs');
                 header("Location: ".$_SERVER["PHP_SELF"]);
                 exit;
@@ -272,6 +277,12 @@ if ($action == 'update' && $id > 0) {
             if (!$error) {
                 $result = $brand->update($user);
                 if ($result > 0) {
+                    // Regenerate PDF model classes (code may have changed)
+                    $brand->deletePdfModels();
+                    $pdfResult = $brand->generatePdfModels();
+                    if (!empty($pdfResult['failed'])) {
+                        setEventMessages($langs->trans("PdfModelsFailed").': '.implode(', ', $pdfResult['failed']), null, 'warnings');
+                    }
                     setEventMessages($langs->trans("BrandUpdated"), null, 'mesgs');
                     header("Location: ".$_SERVER["PHP_SELF"]);
                     exit;
@@ -351,6 +362,8 @@ if ($action == 'confirm_delete' && $confirm == 'yes' && $id > 0) {
         setEventMessages($langs->trans('SecurityTokenHasExpired'), null, 'errors');
     } else {
         $brand->fetch($id);
+        // Delete PDF model classes first
+        $brand->deletePdfModels();
         $result = $brand->delete($user);
         if ($result > 0) {
             setEventMessages($langs->trans("BrandDeleted"), null, 'mesgs');

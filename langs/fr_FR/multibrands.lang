@@ -76,6 +76,7 @@ LogoFileMissing = Fichier logo manquant sur le disque
 RepairExtrafields = Réparer les champs extra
 ExtrafieldsRepaired = Champs extra réparés avec succès
 ExtrafieldsRepairFailed = Échec de la réparation de certains champs extra
+PdfModelsFailed = Échec de la génération de certains fichiers modèle PDF
 
 HowToUse = Comment utiliser MultiBrands
 HowToUseStep1 = 1. Créez des marques ci-dessous (logo, nom de société, couleurs, etc.)

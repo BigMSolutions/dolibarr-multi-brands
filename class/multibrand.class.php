@@ -1,5 +1,5 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.1.2
+/* MultiBrands Module for Dolibarr - v1.1.3
  * http://www.atlasbase.net
  */
 
@@ -298,6 +298,141 @@ class MultiBrand extends CommonObject
     {
         if (empty($this->logo)) return '';
         return DOL_DATA_ROOT.'/multibrands/brands/'.$this->logo;
+    }
+
+    /**
+     * Return the model configuration map (shared by generate and delete)
+     * @return array
+     */
+    public static function getModelConfig()
+    {
+        return array(
+            'propale' => array('base' => 'pdf_azur', 'file' => 'pdf_azur'),
+            'facture' => array('base' => 'pdf_crabe', 'file' => 'pdf_crabe'),
+            'commande' => array('base' => 'pdf_eratosthene', 'file' => 'pdf_eratosthene'),
+        );
+    }
+
+    /**
+     * Generate PDF model classes for this brand
+     * Creates one class per document type (propal, facture, commande)
+     * @return array ['created' => [...], 'failed' => [...]]
+     */
+    public function generatePdfModels()
+    {
+        global $langs;
+        $result = array('created' => array(), 'failed' => array());
+        if (empty($this->code)) return $result;
+
+        $models = self::getModelConfig();
+        $safeLabel = addslashes($this->label);
+        $safeCode = addslashes($this->code);
+
+        foreach ($models as $type => $info) {
+            $className = $info['file'].'_'.$this->code;
+            $fileName = $className.'.modules.php';
+            $filePath = __DIR__.'/../core/modules/'.$type.'/doc/'.$fileName;
+
+            $content = "<?php\n";
+            $content .= "/* MultiBrands Module for Dolibarr - v1.1.3\n";
+            $content .= " * Auto-generated PDF model for brand: ".$this->code."\n";
+            $content .= " * http://www.atlasbase.net\n";
+            $content .= " */\n\n";
+            $content .= "require_once DOL_DOCUMENT_ROOT.'/core/modules/".$type."/doc/".$info['base'].".modules.php';\n";
+            $content .= "dol_include_once('/multi-brands/class/multibrand.class.php');\n";
+            $content .= "dol_include_once('/multi-brands/lib/multibrands.lib.php');\n\n";
+            $content .= "class ".$className." extends ".$info['base']."\n";
+            $content .= "{\n";
+            $content .= "    public function __construct(\$db)\n";
+            $content .= "    {\n";
+            $content .= "        parent::__construct(\$db);\n";
+            $content .= "        \$this->name = \"".$className."\";\n";
+            $content .= "        \$this->description .= ' (' . dol_escape_htmltag('".$safeLabel."') . ')';\n";
+            $content .= "    }\n\n";
+            $content .= "    public function write_file(\$object, \$outputlangs, \$srctemplatepath = '', \$hidedetails = 0, \$hidedesc = 0, \$hideref = 0)\n";
+            $content .= "    {\n";
+            $content .= "        \$brand = new MultiBrand(\$this->db);\n";
+            $content .= "        if (\$brand->fetch(0, '".$safeCode."') > 0) {\n";
+            $content .= "            \$backup = multibrands_apply_brand_to_mysoc(\$brand);\n";
+            $content .= "            try {\n";
+            $content .= "                \$result = parent::write_file(\$object, \$outputlangs, \$srctemplatepath, \$hidedetails, \$hidedesc, \$hideref);\n";
+            $content .= "            } finally {\n";
+            $content .= "                multibrands_restore_mysoc(\$backup);\n";
+            $content .= "            }\n";
+            $content .= "            return \$result;\n";
+            $content .= "        }\n";
+            $content .= "        return parent::write_file(\$object, \$outputlangs, \$srctemplatepath, \$hidedetails, \$hidedesc, \$hideref);\n";
+            $content .= "    }\n";
+            $content .= "}\n";
+
+            $dir = dirname($filePath);
+            if (!file_exists($dir)) {
+                dol_mkdir($dir);
+            }
+
+            if (@file_put_contents($filePath, $content) !== false) {
+                $result['created'][] = $type.'/'.$fileName;
+            } else {
+                $result['failed'][] = $type.'/'.$fileName;
+                dol_syslog('MultiBrand::generatePdfModels failed to write '.$filePath, LOG_ERR);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Delete PDF model classes for this brand
+     * @return array ['deleted' => [...], 'failed' => [...]]
+     */
+    public function deletePdfModels()
+    {
+        $result = array('deleted' => array(), 'failed' => array());
+        if (empty($this->code)) return $result;
+
+        $models = self::getModelConfig();
+        foreach ($models as $type => $info) {
+            $fileName = $info['file'].'_'.$this->code.'.modules.php';
+            $filePath = __DIR__.'/../core/modules/'.$type.'/doc/'.$fileName;
+
+            if (file_exists($filePath)) {
+                if (@unlink($filePath)) {
+                    $result['deleted'][] = $type.'/'.$fileName;
+                } else {
+                    $result['failed'][] = $type.'/'.$fileName;
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Delete ALL generated PDF model files (used during module removal)
+     * Uses glob to find files since the DB table may already be gone
+     * @return int number of files deleted
+     */
+    public static function cleanupAllPdfModels()
+    {
+        $models = self::getModelConfig();
+        $deleted = 0;
+        $moduleDir = __DIR__.'/../core/modules/';
+
+        foreach ($models as $type => $info) {
+            $pattern = $moduleDir.$type.'/doc/'.$info['file'].'_*.modules.php';
+            $files = glob($pattern);
+            if (is_array($files)) {
+                foreach ($files as $file) {
+                    // Don't delete the original branded template (pdf_azur_branded)
+                    if (basename($file) === $info['file'].'_branded.modules.php') continue;
+                    if (@unlink($file)) {
+                        $deleted++;
+                    }
+                }
+            }
+        }
+
+        return $deleted;
     }
 
     private function resetProperties()
