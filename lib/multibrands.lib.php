@@ -1,5 +1,5 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.1.1
+/* MultiBrands Module for Dolibarr - v1.1.2
  * http://www.atlasbase.net
  */
 

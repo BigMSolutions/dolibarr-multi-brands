@@ -1,5 +1,5 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.1.1
+/* MultiBrands Module for Dolibarr - v1.1.2
  * http://www.atlasbase.net
  *
  * This program is free software; you can redistribute it and/or modify
@@ -286,6 +286,65 @@ if ($action == 'update' && $id > 0) {
     }
 }
 
+// REPAIR EXTRAFIELDS (one-click fix for missing "Additional attributes" tabs)
+if ($action == 'repair_extrafields') {
+    if (!GETPOSTISSET('token') || GETPOST('token', 'alpha') != newToken()) {
+        setEventMessages($langs->trans('SecurityTokenHasExpired'), null, 'errors');
+    } else {
+        require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+        $extrafields = new ExtraFields($db);
+        $param = array('options' => array('multibrands_brands:label:code::active=1 AND entity=$ENTITY$' => ''));
+        $targets = array(
+            'propal' => 'Brand',
+            'societe' => 'Default Brand',
+            'facture' => 'Brand',
+            'commande' => 'Brand'
+        );
+        $repaired = array();
+        $failed = array();
+        foreach ($targets as $element => $label) {
+            $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."extrafields WHERE name = 'brand_code' AND elementtype = '".$db->escape($element)."'";
+            $resql = $db->query($sql);
+            $exists = ($resql && $db->num_rows($resql) > 0);
+            if ($exists) {
+                $sqlUpdate = "UPDATE ".MAIN_DB_PREFIX."extrafields"
+                    ." SET param = '".$db->escape(json_encode($param))."',"
+                    ." type = 'sellist',"
+                    ." label = '".$db->escape($label)."'"
+                    ." WHERE name = 'brand_code' AND elementtype = '".$db->escape($element)."'";
+                $resUpdate = $db->query($sqlUpdate);
+                if ($resUpdate) {
+                    $repaired[] = $element.' (updated)';
+                } else {
+                    $failed[] = $element.' (update error: '.$db->lasterror().')';
+                }
+            } else {
+                $result = $extrafields->addExtraField(
+                    'brand_code', $label, 'sellist', 1, '', $element,
+                    0, 0, '', $param, 1, '', '', 0, '', '', 'multibrands@multi-brands'
+                );
+                if ($result > 0) {
+                    $repaired[] = $element.' (created)';
+                } else {
+                    $failed[] = $element.' (create error: '.$extrafields->error.')';
+                }
+            }
+        }
+        // Clear extrafields cache
+        $cacheFile = DOL_DATA_ROOT.'/extrafields/cache_' . $conf->entity . '.json';
+        if (file_exists($cacheFile)) {
+            @unlink($cacheFile);
+        }
+        if (!empty($repaired)) {
+            setEventMessages($langs->trans("ExtrafieldsRepaired").': '.implode(', ', $repaired), null, 'mesgs');
+        }
+        if (!empty($failed)) {
+            setEventMessages($langs->trans("ExtrafieldsRepairFailed").': '.implode(', ', $failed), null, 'errors');
+        }
+    }
+    $action = '';
+}
+
 // DELETE brand
 if ($action == 'confirm_delete' && $confirm == 'yes' && $id > 0) {
     if (!GETPOSTISSET('token') || GETPOST('token', 'alpha') != newToken()) {
@@ -480,6 +539,11 @@ if ($action == 'create' || $action == 'edit') {
 
     print '</table>';
     print '</div>';
+    print '</div>';
+
+    // REPAIR EXTRAFIELDS BUTTON
+    print '<div class="tabsAction">';
+    print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?action=repair_extrafields&token='.newToken().'">'.$langs->trans("RepairExtrafields").'</a>';
     print '</div><br>';
 
     // DELETE CONFIRMATION (must render before list to overlay properly)

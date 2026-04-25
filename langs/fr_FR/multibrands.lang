@@ -73,6 +73,9 @@ Missing = Manquant
 PhpUploadMaxFilesize = PHP upload_max_filesize
 PhpPostMaxSize = PHP post_max_size
 LogoFileMissing = Fichier logo manquant sur le disque
+RepairExtrafields = Réparer les champs extra
+ExtrafieldsRepaired = Champs extra réparés avec succès
+ExtrafieldsRepairFailed = Échec de la réparation de certains champs extra
 
 HowToUse = Comment utiliser MultiBrands
 HowToUseStep1 = 1. Créez des marques ci-dessous (logo, nom de société, couleurs, etc.)

@@ -1,12 +1,12 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.1.1
+/* MultiBrands Module for Dolibarr - v1.1.2
  * http://www.atlasbase.net
  */
 
 /**
  * \file    multi-brands/core/modules/modMultiBrands.class.php
  * \ingroup multi-brands
- * \brief   MultiBrands module descriptor v1.1.1
+ * \brief   MultiBrands module descriptor v1.1.2
  */
 
 require_once DOL_DOCUMENT_ROOT.'/core/modules/DolibarrModules.class.php';
@@ -25,7 +25,7 @@ class modMultiBrands extends DolibarrModules
         $this->name = preg_replace('/^mod/i', '', get_class($this));
         $this->description = "Issue quotations and documents under multiple brands / DBAs from a single company";
         $this->descriptionlong = "Define multiple brand identities (logo, name, colors, address, legal text) and dynamically apply them to proposals, invoices, orders and other PDF documents based on a custom field selection.";
-        $this->version = '1.1.1';
+        $this->version = '1.1.2';
         $this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
         $this->picto = 'label';
 
