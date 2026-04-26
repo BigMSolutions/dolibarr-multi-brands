@@ -1,14 +1,22 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.1.4
+/* MultiBrands Module for Dolibarr - v1.2.1
  * http://www.atlasbase.net
  */
 
+// Load abstract parent so it's always available during model discovery
+require_once DOL_DOCUMENT_ROOT.'/core/modules/commande/modules_commande.php';
 require_once DOL_DOCUMENT_ROOT.'/core/modules/commande/doc/pdf_eratosthene.modules.php';
-dol_include_once('/multi-brands/class/multibrand.class.php');
-dol_include_once('/multi-brands/lib/multibrands.lib.php');
+
+dol_include_once('/multibrands/class/multibrand.class.php');
+dol_include_once('/multibrands/lib/multibrands.lib.php');
+
+if (!class_exists('pdf_eratosthene')) return;
 
 class pdf_eratosthene_branded extends pdf_eratosthene
 {
+    /** @var string Required by Dolibarr model scanner - must match document type */
+    public $type = 'pdf';
+
     public $activeBrand = null;
     public $origMysoc = array();
 
@@ -17,6 +25,7 @@ class pdf_eratosthene_branded extends pdf_eratosthene
         parent::__construct($db);
         $this->name = "eratosthene_branded";
         global $langs;
+        $langs->loadLangs(array("multibrands@multibrands"));
         $this->description .= ' '.$langs->trans("PDFMultiBrandsSupport");
     }
 
@@ -38,11 +47,11 @@ class pdf_eratosthene_branded extends pdf_eratosthene
         }
     }
 
-    public function write_file($object, $outputlangs, $srctemplatepath = '', $hidedetails = 0, $hidedesc = 0, $hideref = 0)
+    public function write_file($object, $outputlangs, $srctemplatepath = '', $hidedetails = 0, $hideref = 0)
     {
         $this->loadBrand($object);
         try {
-            $result = parent::write_file($object, $outputlangs, $srctemplatepath, $hidedetails, $hidedesc, $hideref);
+            $result = parent::write_file($object, $outputlangs, $srctemplatepath, $hidedetails, $hideref);
         } finally {
             $this->restoreMysoc();
         }

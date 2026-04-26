@@ -1,10 +1,10 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.1.4
+/* MultiBrands Module for Dolibarr - v1.2.1
  * http://www.atlasbase.net
  */
 
 require_once DOL_DOCUMENT_ROOT.'/core/triggers/dolibarrtriggers.class.php';
-dol_include_once('/multi-brands/class/multibrand.class.php');
+dol_include_once('/multibrands/class/multibrand.class.php');
 
 /**
  * Trigger class
@@ -12,9 +12,9 @@ dol_include_once('/multi-brands/class/multibrand.class.php');
 class InterfaceMultiBrandsWorkflow extends DolibarrTriggers
 {
     public $name = 'MultiBrandsWorkflow';
-    public $family = 'multi-brands';
+    public $family = 'multibrands';
     public $description = "Auto-assign brand to proposals, invoices, orders from thirdparty default";
-    public $version = '1.1.4';
+    public $version = '1.2.1';
     public $picto = 'label';
     // Handled events: PROPAL_CREATE, PROPAL_MODIFY, FACTURE_CREATE, FACTURE_MODIFY, COMMANDE_CREATE, COMMANDE_MODIFY
 

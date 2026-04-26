@@ -1,5 +1,5 @@
 <?php
-/* MultiBrands Module Diagnostic Tool - v1.1.4
+/* MultiBrands Module Diagnostic Tool - v1.2.1
  * Place this file in your Dolibarr root and access via browser.
  * It will try to locate the multi-brands module and report status.
  */
@@ -34,7 +34,7 @@ if (php_sapi_name() !== 'cli'
     </style>
 </head>
 <body>
-<h1>MultiBrands Module Diagnostic v1.1.4</h1>
+<h1>MultiBrands Module Diagnostic v1.2.1</h1>
 
 <?php
 function test($label, $condition, $errorMsg = '') {
@@ -77,6 +77,11 @@ if (!$mainFound) {
 // 3. Module location
 echo "<h2>3. Module Location</h2>";
 $modulePaths = [
+    __DIR__.'/custom/multibrands/core/modules/modMultiBrands.class.php',
+    __DIR__.'/../htdocs/custom/multibrands/core/modules/modMultiBrands.class.php',
+    __DIR__.'/../../htdocs/custom/multibrands/core/modules/modMultiBrands.class.php',
+    (empty($_SERVER['DOCUMENT_ROOT']) ? '' : $_SERVER['DOCUMENT_ROOT'].'/custom/multibrands/core/modules/modMultiBrands.class.php'),
+    // Legacy paths (multi-brands folder name)
     __DIR__.'/custom/multi-brands/core/modules/modMultiBrands.class.php',
     __DIR__.'/../htdocs/custom/multi-brands/core/modules/modMultiBrands.class.php',
     __DIR__.'/../../htdocs/custom/multi-brands/core/modules/modMultiBrands.class.php',
@@ -230,6 +235,6 @@ if (!empty($logFile) && file_exists($logFile) && is_readable($logFile)) {
 ?>
 
 <hr>
-<p style="color:#888;">MultiBrands Diagnostic v1.1.4 — If this page loads, PHP is working. If sections show errors, those are your clues.</p>
+<p style="color:#888;">MultiBrands Diagnostic v1.2.1 — If this page loads, PHP is working. If sections show errors, those are your clues.</p>
 </body>
 </html>

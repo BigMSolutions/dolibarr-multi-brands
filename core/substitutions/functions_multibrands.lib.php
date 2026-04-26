@@ -1,5 +1,5 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.1.4
+/* MultiBrands Module for Dolibarr - v1.2.1
  * http://www.atlasbase.net
  */
 
@@ -15,8 +15,8 @@ function multibrands_completesubstitutionarray(&$substitutionarray, $outputlangs
     global $db, $conf, $mysoc;
     if (empty($conf->multibrands->enabled)) return;
 
-    dol_include_once('/multi-brands/class/multibrand.class.php');
-    dol_include_once('/multi-brands/lib/multibrands.lib.php');
+    dol_include_once('/multibrands/class/multibrand.class.php');
+    dol_include_once('/multibrands/lib/multibrands.lib.php');
 
     if (!empty($object->table_element) && in_array($object->table_element, array('propal', 'commande', 'facture'))) {
         $brand = multibrands_get_brand_for_object($db, $object);

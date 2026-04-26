@@ -1,5 +1,5 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.1.4
+/* MultiBrands Module for Dolibarr - v1.2.1
  * http://www.atlasbase.net
  */
 
@@ -321,9 +321,16 @@ class MultiBrand extends CommonObject
     public static function getModelConfig()
     {
         return array(
-            'propale' => array('base' => 'pdf_azur', 'file' => 'pdf_azur'),
-            'facture' => array('base' => 'pdf_crabe', 'file' => 'pdf_crabe'),
-            'commande' => array('base' => 'pdf_eratosthene', 'file' => 'pdf_eratosthene'),
+            'propale' => array(
+                array('base' => 'pdf_cyan', 'file' => 'pdf_cyan'),
+                array('base' => 'pdf_azur', 'file' => 'pdf_azur'),
+            ),
+            'facture' => array(
+                array('base' => 'pdf_crabe', 'file' => 'pdf_crabe'),
+            ),
+            'commande' => array(
+                array('base' => 'pdf_eratosthene', 'file' => 'pdf_eratosthene'),
+            ),
         );
     }
 
@@ -342,53 +349,56 @@ class MultiBrand extends CommonObject
         $safeLabel = addslashes($this->label);
         $safeCode = addslashes($this->code);
 
-        foreach ($models as $type => $info) {
-            $className = $info['file'].'_'.$this->code;
-            $fileName = $className.'.modules.php';
-            $filePath = __DIR__.'/../core/modules/'.$type.'/doc/'.$fileName;
+        foreach ($models as $type => $typeModels) {
+            foreach ($typeModels as $info) {
+                $className = $info['file'].'_'.$this->code;
+                $fileName = $className.'.modules.php';
+                $filePath = __DIR__.'/../core/modules/'.$type.'/doc/'.$fileName;
 
-            $content = "<?php\n";
-            $content .= "/* MultiBrands Module for Dolibarr - v1.1.4\n";
-            $content .= " * Auto-generated PDF model for brand: ".$this->code."\n";
-            $content .= " * http://www.atlasbase.net\n";
-            $content .= " */\n\n";
-            $content .= "require_once DOL_DOCUMENT_ROOT.'/core/modules/".$type."/doc/".$info['base'].".modules.php';\n";
-            $content .= "dol_include_once('/multi-brands/class/multibrand.class.php');\n";
-            $content .= "dol_include_once('/multi-brands/lib/multibrands.lib.php');\n\n";
-            $content .= "class ".$className." extends ".$info['base']."\n";
-            $content .= "{\n";
-            $content .= "    public function __construct(\$db)\n";
-            $content .= "    {\n";
-            $content .= "        parent::__construct(\$db);\n";
-            $content .= "        \$this->name = \"".$className."\";\n";
-            $content .= "        \$this->description .= ' (' . dol_escape_htmltag('".$safeLabel."') . ')';\n";
-            $content .= "    }\n\n";
-            $content .= "    public function write_file(\$object, \$outputlangs, \$srctemplatepath = '', \$hidedetails = 0, \$hidedesc = 0, \$hideref = 0)\n";
-            $content .= "    {\n";
-            $content .= "        \$brand = new MultiBrand(\$this->db);\n";
-            $content .= "        if (\$brand->fetch(0, '".$safeCode."') > 0) {\n";
-            $content .= "            \$backup = multibrands_apply_brand_to_mysoc(\$brand);\n";
-            $content .= "            try {\n";
-            $content .= "                \$result = parent::write_file(\$object, \$outputlangs, \$srctemplatepath, \$hidedetails, \$hidedesc, \$hideref);\n";
-            $content .= "            } finally {\n";
-            $content .= "                multibrands_restore_mysoc(\$backup);\n";
-            $content .= "            }\n";
-            $content .= "            return \$result;\n";
-            $content .= "        }\n";
-            $content .= "        return parent::write_file(\$object, \$outputlangs, \$srctemplatepath, \$hidedetails, \$hidedesc, \$hideref);\n";
-            $content .= "    }\n";
-            $content .= "}\n";
+                $content = "<?php\n";
+                $content .= "/* MultiBrands Module for Dolibarr - v1.2.1\n";
+                $content .= " * Auto-generated PDF model for brand: ".$this->code."\n";
+                $content .= " * http://www.atlasbase.net\n";
+                $content .= " */\n\n";
+                $content .= "require_once DOL_DOCUMENT_ROOT.'/core/modules/".$type."/doc/".$info['base'].".modules.php';\n";
+                $content .= "if (!class_exists('".$info['base']."')) return;\n\n";
+                $content .= "dol_include_once('/multibrands/class/multibrand.class.php');\n";
+                $content .= "dol_include_once('/multibrands/lib/multibrands.lib.php');\n\n";
+                $content .= "class ".$className." extends ".$info['base']."\n";
+                $content .= "{\n";
+                $content .= "    public function __construct(\$db)\n";
+                $content .= "    {\n";
+                $content .= "        parent::__construct(\$db);\n";
+                $content .= "        \$this->name = \"".$className."\";\n";
+                $content .= "        \$this->description .= ' (' . dol_escape_htmltag('".$safeLabel."') . ')';\n";
+                $content .= "    }\n\n";
+                $content .= "    public function write_file(\$object, \$outputlangs, \$srctemplatepath = '', \$hidedetails = 0, \$hidedesc = 0, \$hideref = 0)\n";
+                $content .= "    {\n";
+                $content .= "        \$brand = new MultiBrand(\$this->db);\n";
+                $content .= "        if (\$brand->fetch(0, '".$safeCode."') > 0) {\n";
+                $content .= "            \$backup = multibrands_apply_brand_to_mysoc(\$brand);\n";
+                $content .= "            try {\n";
+                $content .= "                \$result = parent::write_file(\$object, \$outputlangs, \$srctemplatepath, \$hidedetails, \$hidedesc, \$hideref);\n";
+                $content .= "            } finally {\n";
+                $content .= "                multibrands_restore_mysoc(\$backup);\n";
+                $content .= "            }\n";
+                $content .= "            return \$result;\n";
+                $content .= "        }\n";
+                $content .= "        return parent::write_file(\$object, \$outputlangs, \$srctemplatepath, \$hidedetails, \$hidedesc, \$hideref);\n";
+                $content .= "    }\n";
+                $content .= "}\n";
 
-            $dir = dirname($filePath);
-            if (!file_exists($dir)) {
-                dol_mkdir($dir);
-            }
+                $dir = dirname($filePath);
+                if (!file_exists($dir)) {
+                    dol_mkdir($dir);
+                }
 
-            if (@file_put_contents($filePath, $content) !== false) {
-                $result['created'][] = $type.'/'.$fileName;
-            } else {
-                $result['failed'][] = $type.'/'.$fileName;
-                dol_syslog('MultiBrand::generatePdfModels failed to write '.$filePath, LOG_ERR);
+                if (@file_put_contents($filePath, $content) !== false) {
+                    $result['created'][] = $type.'/'.$fileName;
+                } else {
+                    $result['failed'][] = $type.'/'.$fileName;
+                    dol_syslog('MultiBrand::generatePdfModels failed to write '.$filePath, LOG_ERR);
+                }
             }
         }
 
@@ -405,15 +415,17 @@ class MultiBrand extends CommonObject
         if (empty($this->code)) return $result;
 
         $models = self::getModelConfig();
-        foreach ($models as $type => $info) {
-            $fileName = $info['file'].'_'.$this->code.'.modules.php';
-            $filePath = __DIR__.'/../core/modules/'.$type.'/doc/'.$fileName;
+        foreach ($models as $type => $typeModels) {
+            foreach ($typeModels as $info) {
+                $fileName = $info['file'].'_'.$this->code.'.modules.php';
+                $filePath = __DIR__.'/../core/modules/'.$type.'/doc/'.$fileName;
 
-            if (file_exists($filePath)) {
-                if (@unlink($filePath)) {
-                    $result['deleted'][] = $type.'/'.$fileName;
-                } else {
-                    $result['failed'][] = $type.'/'.$fileName;
+                if (file_exists($filePath)) {
+                    if (@unlink($filePath)) {
+                        $result['deleted'][] = $type.'/'.$fileName;
+                    } else {
+                        $result['failed'][] = $type.'/'.$fileName;
+                    }
                 }
             }
         }
@@ -432,15 +444,17 @@ class MultiBrand extends CommonObject
         $deleted = 0;
         $moduleDir = __DIR__.'/../core/modules/';
 
-        foreach ($models as $type => $info) {
-            $pattern = $moduleDir.$type.'/doc/'.$info['file'].'_*.modules.php';
-            $files = glob($pattern);
-            if (is_array($files)) {
-                foreach ($files as $file) {
-                    // Don't delete the original branded template (pdf_azur_branded)
-                    if (basename($file) === $info['file'].'_branded.modules.php') continue;
-                    if (@unlink($file)) {
-                        $deleted++;
+        foreach ($models as $type => $typeModels) {
+            foreach ($typeModels as $info) {
+                $pattern = $moduleDir.$type.'/doc/'.$info['file'].'_*.modules.php';
+                $files = glob($pattern);
+                if (is_array($files)) {
+                    foreach ($files as $file) {
+                        // Don't delete the original branded templates (pdf_azur_branded, pdf_cyan_branded)
+                        if (basename($file) === $info['file'].'_branded.modules.php') continue;
+                        if (@unlink($file)) {
+                            $deleted++;
+                        }
                     }
                 }
             }

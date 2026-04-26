@@ -1,14 +1,22 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.1.4
+/* MultiBrands Module for Dolibarr - v1.2.1
  * http://www.atlasbase.net
  */
 
+// Load abstract parent so it's always available during model discovery
+require_once DOL_DOCUMENT_ROOT.'/core/modules/facture/modules_facture.php';
 require_once DOL_DOCUMENT_ROOT.'/core/modules/facture/doc/pdf_crabe.modules.php';
-dol_include_once('/multi-brands/class/multibrand.class.php');
-dol_include_once('/multi-brands/lib/multibrands.lib.php');
+
+dol_include_once('/multibrands/class/multibrand.class.php');
+dol_include_once('/multibrands/lib/multibrands.lib.php');
+
+if (!class_exists('pdf_crabe')) return;
 
 class pdf_crabe_branded extends pdf_crabe
 {
+    /** @var string Required by Dolibarr model scanner - must match document type */
+    public $type = 'pdf';
+
     public $activeBrand = null;
     public $origMysoc = array();
 
@@ -17,6 +25,7 @@ class pdf_crabe_branded extends pdf_crabe
         parent::__construct($db);
         $this->name = "crabe_branded";
         global $langs;
+        $langs->loadLangs(array("multibrands@multibrands"));
         $this->description .= ' '.$langs->trans("PDFMultiBrandsSupport");
     }
 

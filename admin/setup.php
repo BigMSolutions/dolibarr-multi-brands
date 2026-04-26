@@ -1,5 +1,5 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.1.4
+/* MultiBrands Module for Dolibarr - v1.2.1
  * http://www.atlasbase.net
  *
  * This program is free software; you can redistribute it and/or modify
@@ -62,7 +62,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 
 // Load translations
-$langs->loadLangs(array("admin", "multibrands@multi-brands"));
+$langs->loadLangs(array("admin", "multibrands@multibrands"));
 
 
 
@@ -299,7 +299,7 @@ if ($action == 'update' && $id > 0) {
 
 // REPAIR EXTRAFIELDS (one-click fix for missing "Additional attributes" tabs)
 if ($action == 'repair_extrafields') {
-    if (!GETPOSTISSET('token') || GETPOST('token', 'alpha') != newToken()) {
+    if (!GETPOSTISSET('token') || !verifCsrfToken()) {
         setEventMessages($langs->trans('SecurityTokenHasExpired'), null, 'errors');
     } else {
         require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
@@ -321,7 +321,10 @@ if ($action == 'repair_extrafields') {
                 $sqlUpdate = "UPDATE ".MAIN_DB_PREFIX."extrafields"
                     ." SET param = '".$db->escape(json_encode($param))."',"
                     ." type = 'sellist',"
-                    ." label = '".$db->escape($label)."'"
+                    ." label = '".$db->escape($label)."',"
+                    ." list = '1',"
+                    ." printable = 1,"
+                    ." langfile = 'multibrands@multibrands'"
                     ." WHERE name = 'brand_code' AND elementtype = '".$db->escape($element)."'";
                 $resUpdate = $db->query($sqlUpdate);
                 if ($resUpdate) {
@@ -332,7 +335,7 @@ if ($action == 'repair_extrafields') {
             } else {
                 $result = $extrafields->addExtraField(
                     'brand_code', $label, 'sellist', 1, '', $element,
-                    0, 0, '', $param, 1, '', '', 0, '', '', 'multibrands@multi-brands'
+                    0, 0, '', $param, 1, '', '', 0, '', '', 'multibrands@multibrands'
                 );
                 if ($result > 0) {
                     $repaired[] = $element.' (created)';
@@ -353,7 +356,9 @@ if ($action == 'repair_extrafields') {
             setEventMessages($langs->trans("ExtrafieldsRepairFailed").': '.implode(', ', $failed), null, 'errors');
         }
     }
-    $action = '';
+    // PRG pattern: redirect to avoid re-submission on F5
+    header("Location: ".$_SERVER["PHP_SELF"]);
+    exit;
 }
 
 // DELETE brand
@@ -388,7 +393,7 @@ $head[$h][1] = $langs->trans("Settings");
 $head[$h][2] = 'settings';
 $head[$h][3] = '';
 
-print dol_get_fiche_head($head, 'settings', $langs->trans("MultiBrands"), -1, "multibrands@multi-brands");
+print dol_get_fiche_head($head, 'settings', $langs->trans("MultiBrands"), -1, "multibrands@multibrands");
 
 // CREATE / EDIT FORM
 if ($action == 'create' || $action == 'edit') {
@@ -556,7 +561,11 @@ if ($action == 'create' || $action == 'edit') {
 
     // REPAIR EXTRAFIELDS BUTTON
     print '<div class="tabsAction">';
-    print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?action=repair_extrafields&token='.newToken().'">'.$langs->trans("RepairExtrafields").'</a>';
+    print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'" style="display:inline;">';
+    print '<input type="hidden" name="token" value="'.newToken().'">';
+    print '<input type="hidden" name="action" value="repair_extrafields">';
+    print '<button type="submit" class="butAction">'.$langs->trans("RepairExtrafields").'</button>';
+    print '</form>';
     print '</div><br>';
 
     // DELETE CONFIRMATION (must render before list to overlay properly)
@@ -581,7 +590,7 @@ if ($action == 'create' || $action == 'edit') {
     print '<td>'.$langs->trans("Label").'</td>';
     print '<td>'.$langs->trans("Code").'</td>';
     print '<td>'.$langs->trans("CompanyName").'</td>';
-    print '<td>'.$langs->trans("Default").'</td>';
+    print '<td>'.$langs->trans("DefaultBrand").'</td>';
     print '<td>'.$langs->trans("Active").'</td>';
     print '<td class="right">'.$langs->trans("Actions").'</td>';
     print '</tr>';

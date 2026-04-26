@@ -1,0 +1,57 @@
+# ============================================================
+# MultiBrands Module — .gitignore
+# Only module source files are tracked.
+# Agent artifacts, test files, and generated outputs are excluded.
+# ============================================================
+
+# ----- Agent / AI session files -----
+.playwright-mcp/
+.gemini/
+*.session.json
+
+# ----- Planning / scratch docs created by agents -----
+PLAN.md
+
+# ----- Test / debug artefacts -----
+test_logo.png
+test_*.png
+test_*.jpg
+
+# ----- Empty stub directories at root (not real module dirs) -----
+# The real files live under core/ — these root-level stubs add no value.
+/doc/
+/triggers/
+/pdf/
+/sql/
+
+# ----- Dynamically generated per-brand PDF models -----
+# auto-created at runtime by MultiBrand::generatePdfModels().
+# Pattern: any pdf_* file that does NOT end with _branded.modules.php
+# Committed (static branded templates):
+#   pdf_azur_branded.modules.php
+#   pdf_cyan_branded.modules.php
+#   pdf_crabe_branded.modules.php
+#   pdf_eratosthene_branded.modules.php
+# Excluded (runtime-generated per-brand):
+#   pdf_cyan_mybrand.modules.php
+#   pdf_crabe_acme_france.modules.php
+#   etc.
+core/modules/*/doc/pdf_*_*.modules.php
+!core/modules/*/doc/pdf_*_branded.modules.php
+
+# ----- OS & editor noise -----
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# ----- PHP / Composer -----
+vendor/
+composer.lock
+
+# ----- Dolibarr runtime outputs (if running locally) -----
+documents/

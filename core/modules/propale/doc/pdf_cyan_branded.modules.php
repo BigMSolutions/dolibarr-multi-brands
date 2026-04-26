@@ -4,14 +4,14 @@
  */
 
 require_once DOL_DOCUMENT_ROOT.'/core/modules/propale/modules_propale.php';
-require_once DOL_DOCUMENT_ROOT.'/core/modules/propale/doc/pdf_azur.modules.php';
+require_once DOL_DOCUMENT_ROOT.'/core/modules/propale/doc/pdf_cyan.modules.php';
 
 dol_include_once('/multibrands/class/multibrand.class.php');
 dol_include_once('/multibrands/lib/multibrands.lib.php');
 
-if (!class_exists('pdf_azur')) return;
+if (!class_exists('pdf_cyan')) return;
 
-class pdf_azur_branded extends pdf_azur
+class pdf_cyan_branded extends pdf_cyan
 {
     /** @var string Required by Dolibarr model scanner */
     public $type = 'pdf';
@@ -22,7 +22,7 @@ class pdf_azur_branded extends pdf_azur
     public function __construct($db)
     {
         parent::__construct($db);
-        $this->name = "azur_branded";
+        $this->name = "cyan_branded";
         global $langs;
         $langs->loadLangs(array("multibrands@multibrands"));
         $this->description .= ' '.$langs->trans("PDFMultiBrandsSupport");

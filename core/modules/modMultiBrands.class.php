@@ -1,12 +1,12 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.1.4
+/* MultiBrands Module for Dolibarr - v1.2.1
  * http://www.atlasbase.net
  */
 
 /**
- * \file    multi-brands/core/modules/modMultiBrands.class.php
- * \ingroup multi-brands
- * \brief   MultiBrands module descriptor v1.1.4
+ * \file    multibrands/core/modules/modMultiBrands.class.php
+ * \ingroup multibrands
+ * \brief   MultiBrands module descriptor v1.2.1
  */
 
 require_once DOL_DOCUMENT_ROOT.'/core/modules/DolibarrModules.class.php';
@@ -22,11 +22,11 @@ class modMultiBrands extends DolibarrModules
         $this->rights_class = 'multibrands';
         $this->family = "products";
         $this->module_position = '90';
-        $this->name = preg_replace('/^mod/i', '', get_class($this));
+        $this->name = 'multibrands';
         $this->description = "Issue quotations and documents under multiple brands / DBAs from a single company";
         $this->descriptionlong = "Define multiple brand identities (logo, name, colors, address, legal text) and dynamically apply them to proposals, invoices, orders and other PDF documents based on a custom field selection.";
-        $this->version = '1.1.4';
-        $this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
+        $this->version = '1.2.1';
+        $this->const_name = 'MAIN_MODULE_MULTIBRANDS';
         $this->picto = 'label';
 
         $this->module_parts = array(
@@ -42,11 +42,11 @@ class modMultiBrands extends DolibarrModules
             '/multibrands/temp',
         );
 
-        $this->config_page_url = array("setup.php@multi-brands");
+        $this->config_page_url = array("setup.php@multibrands");
         $this->depends = array('modSociete');
         $this->requiredby = array();
         $this->conflictwith = array();
-        $this->langfiles = array("multibrands@multi-brands");
+        $this->langfiles = array("multibrands@multibrands");
         $this->need_dolibarr_version = array(17, 0);
 
         $this->const = array(
@@ -78,8 +78,8 @@ class modMultiBrands extends DolibarrModules
             'prefix' => img_picto('', $this->picto, 'class="paddingright pictofixedwidth valignmiddle"'),
             'mainmenu' => 'tools',
             'leftmenu' => 'multibrands',
-            'url' => '/multi-brands/admin/setup.php',
-            'langs' => 'multibrands@multi-brands',
+            'url' => '/custom/multibrands/admin/setup.php',
+            'langs' => 'multibrands@multibrands',
             'position' => 100,
             'enabled' => '$conf->multibrands->enabled',
             'perms' => '$user->rights->multibrands->read',
@@ -203,7 +203,7 @@ class modMultiBrands extends DolibarrModules
         $result = $this->_init($sql, $options);
 
         // Regenerate PDF model classes for all existing brands (after table exists)
-        dol_include_once('/multi-brands/class/multibrand.class.php');
+        dol_include_once('/multibrands/class/multibrand.class.php');
         $sqlBrands = "SELECT code FROM ".MAIN_DB_PREFIX."multibrands_brands WHERE entity = ".((int)$conf->entity)." AND active = 1";
         $resqlBrands = $this->db->query($sqlBrands);
         if ($resqlBrands) {
@@ -245,7 +245,10 @@ class modMultiBrands extends DolibarrModules
                 $sqlUpdate = "UPDATE ".MAIN_DB_PREFIX."extrafields"
                     ." SET param = '".$this->db->escape(json_encode($param))."',"
                     ." type = 'sellist',"
-                    ." label = '".$this->db->escape($label)."'"
+                    ." label = '".$this->db->escape($label)."',"
+                    ." list = '1',"
+                    ." printable = 1,"
+                    ." langfile = 'multibrands@multibrands'"
                     ." WHERE name = 'brand_code' AND elementtype = '".$this->db->escape($element)."'";
                 $resUpdate = $this->db->query($sqlUpdate);
                 if (!$resUpdate) {
@@ -265,11 +268,11 @@ class modMultiBrands extends DolibarrModules
                     $param,
                     1,
                     '',
+                    '1',
+                    1,
                     '',
-                    0,
                     '',
-                    '',
-                    'multibrands@multi-brands'
+                    'multibrands@multibrands'
                 );
                 if ($result < 0) {
                     dol_syslog('MultiBrands::addExtrafields error for '.$element.': '.$extrafields->error, LOG_ERR);
@@ -281,7 +284,7 @@ class modMultiBrands extends DolibarrModules
     public function remove($options = '')
     {
         // Clean up generated PDF model files before dropping tables
-        dol_include_once('/multi-brands/class/multibrand.class.php');
+        dol_include_once('/multibrands/class/multibrand.class.php');
         MultiBrand::cleanupAllPdfModels();
 
         $sql = array();
