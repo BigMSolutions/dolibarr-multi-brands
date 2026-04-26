@@ -1,5 +1,5 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.1.3
+/* MultiBrands Module for Dolibarr - v1.1.4
  * http://www.atlasbase.net
  *
  * This program is free software; you can redistribute it and/or modify
@@ -137,7 +137,7 @@ if ($action == 'add') {
                     setEventMessages($langs->trans("ErrorFileTooLarge"), null, 'errors');
                     $error++;
                 } else {
-                    $dir = DOL_DATA_ROOT.'/multibrands/brands';
+                    $dir = DOL_DATA_ROOT.'/multibrands/brands/logos';
                     if (!file_exists($dir)) {
                         dol_mkdir($dir);
                     }
@@ -214,7 +214,7 @@ if ($action == 'update' && $id > 0) {
 
             // If code changed and there's an existing logo but no new upload, rename logo file
             if ($old_logo && $old_code != $brand->code && empty($_FILES['logo']['tmp_name'])) {
-                $dir = DOL_DATA_ROOT.'/multibrands/brands';
+                $dir = DOL_DATA_ROOT.'/multibrands/brands/logos';
                 $old_path = $dir.'/'.$old_logo;
                 $new_logo_name = preg_replace('/^'.preg_quote($old_code.'_', '/').'/', $brand->code.'_', $old_logo);
                 if (file_exists($old_path) && $old_logo != $new_logo_name) {
@@ -253,7 +253,7 @@ if ($action == 'update' && $id > 0) {
                         setEventMessages($langs->trans("ErrorFileTooLarge"), null, 'errors');
                         $error++;
                     } else {
-                        $dir = DOL_DATA_ROOT.'/multibrands/brands';
+                        $dir = DOL_DATA_ROOT.'/multibrands/brands/logos';
                         if (!file_exists($dir)) dol_mkdir($dir);
                         if (!is_writable($dir)) {
                             setEventMessages($langs->trans("ErrorDirectoryNotWritable").": ".$dir, null, 'errors');
@@ -416,9 +416,9 @@ if ($action == 'create' || $action == 'edit') {
     print '<input type="file" name="logo" accept="image/png,image/jpeg,image/gif,image/webp">';
     print ' <span class="opacitymedium">'.$langs->trans("LogoMaxSize").'</span>';
     if ($brand->logo) {
-        $logoPath = DOL_DATA_ROOT.'/multibrands/brands/'.$brand->logo;
+        $logoPath = DOL_DATA_ROOT.'/multibrands/brands/logos/'.$brand->logo;
         if (file_exists($logoPath)) {
-            print '<br><img src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=multibrands&file='.urlencode($brand->logo).'" style="max-height:60px; margin-top:5px;">';
+            print '<br><img src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=multibrands&file='.urlencode($brand->logo).'&cache=0&entity='.((int)$conf->entity).'" style="max-height:60px; margin-top:5px;">';
         } else {
             print '<br><span class="warning">'.$langs->trans("LogoFileMissing").': '.dol_escape_htmltag($brand->logo).'</span>';
         }
@@ -520,7 +520,7 @@ if ($action == 'create' || $action == 'edit') {
     print '<table class="noborder centpercent">';
     print '<tr class="liste_titre"><td colspan="2">'.$langs->trans("Diagnostics").'</td></tr>';
 
-    $diagDir = DOL_DATA_ROOT.'/multibrands/brands';
+    $diagDir = DOL_DATA_ROOT.'/multibrands/brands/logos';
     $diagDirOk = file_exists($diagDir) && is_writable($diagDir);
     print '<tr><td>'.$langs->trans("LogoDirectory").'</td><td>'.($diagDirOk ? '<span class="ok">'.$langs->trans("Writable").'</span>' : '<span class="error">'.$langs->trans("NotWritable").': '.dol_escape_htmltag($diagDir).'</span>').'</td></tr>';
 
@@ -601,9 +601,9 @@ if ($action == 'create' || $action == 'edit') {
                 print '<tr class="oddeven">';
                 print '<td>';
                 if ($obj->logo) {
-                    $logoPath = DOL_DATA_ROOT.'/multibrands/brands/'.$obj->logo;
+                    $logoPath = DOL_DATA_ROOT.'/multibrands/brands/logos/'.$obj->logo;
                     if (file_exists($logoPath)) {
-                        print '<img src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=multibrands&file='.urlencode($obj->logo).'" style="max-height:40px;">';
+                        print '<img src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=multibrands&file='.urlencode($obj->logo).'&cache=0&entity='.((int)$conf->entity).'" style="max-height:40px;">';
                     } else {
                         print '<span class="warning">'.$langs->trans("LogoFileMissing").'</span>';
                     }

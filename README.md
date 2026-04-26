@@ -1,4 +1,4 @@
-# MultiBrands Module for Dolibarr v1.1.0
+# MultiBrands Module for Dolibarr v1.1.4
 
 **Author:** atlasbase.net  
 **License:** GPL v3+
@@ -99,7 +99,7 @@ It will show:
 → Make sure you've selected the branded PDF template as default.
 
 **Logo not showing**
-→ Check file is under 2MB and `documents/multibrands/brands/` is writable.
+→ Check file is under 2MB and `documents/multibrands/brands/logos/` is writable.
 
 **Trigger not auto-assigning**
 → Verify trigger is active: Home → Setup → Security → Triggers.
@@ -128,6 +128,7 @@ multi-brands/
 
 ## Version History
 
+- **v1.1.4** — Fixed logo preview (added cache/entity params), fixed PDF model discovery (added models modulepart), fixed logo path for PDF generation (logos subdirectory)
 - **v1.1.0** — Complete rewrite: bulletproof includes, diagnostic tool, all document types
 - **v1.0.2** — Fixed include path issues
 - **v1.0.1** — Hotfix for missing main.inc.php

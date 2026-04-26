@@ -1,12 +1,12 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.1.3
+/* MultiBrands Module for Dolibarr - v1.1.4
  * http://www.atlasbase.net
  */
 
 /**
  * \file    multi-brands/core/modules/modMultiBrands.class.php
  * \ingroup multi-brands
- * \brief   MultiBrands module descriptor v1.1.3
+ * \brief   MultiBrands module descriptor v1.1.4
  */
 
 require_once DOL_DOCUMENT_ROOT.'/core/modules/DolibarrModules.class.php';
@@ -25,18 +25,20 @@ class modMultiBrands extends DolibarrModules
         $this->name = preg_replace('/^mod/i', '', get_class($this));
         $this->description = "Issue quotations and documents under multiple brands / DBAs from a single company";
         $this->descriptionlong = "Define multiple brand identities (logo, name, colors, address, legal text) and dynamically apply them to proposals, invoices, orders and other PDF documents based on a custom field selection.";
-        $this->version = '1.1.3';
+        $this->version = '1.1.4';
         $this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
         $this->picto = 'label';
 
         $this->module_parts = array(
             'triggers' => 1,
             'substitutions' => 1,
-            'modulepart' => array('multibrands' => array('dir' => 'multibrands/brands')),
+            'models' => 1,
+            'modulepart' => array('multibrands' => array('dir' => 'multibrands/brands/logos')),
         );
 
         $this->dirs = array(
             '/multibrands/brands',
+            '/multibrands/brands/logos',
             '/multibrands/temp',
         );
 
@@ -48,7 +50,7 @@ class modMultiBrands extends DolibarrModules
         $this->need_dolibarr_version = array(17, 0);
 
         $this->const = array(
-            array('MULTIBRANDS_MAIN_LOGO_PATH', 'chaine', 'multibrands/brands', 'Logo storage directory', 1),
+            array('MULTIBRANDS_MAIN_LOGO_PATH', 'chaine', 'multibrands/brands/logos', 'Logo storage directory', 1),
         );
 
         $this->rights = array();
@@ -168,6 +170,24 @@ class modMultiBrands extends DolibarrModules
             $dir = DOL_DATA_ROOT.'/multibrands/brands';
             if (!file_exists($dir)) {
                 dol_mkdir($dir);
+            }
+            $dirlogos = DOL_DATA_ROOT.'/multibrands/brands/logos';
+            if (!file_exists($dirlogos)) {
+                dol_mkdir($dirlogos);
+            }
+            // Migrate existing logos from old location (brands/) to new location (brands/logos/)
+            if (file_exists($dir) && is_dir($dir)) {
+                $files = glob($dir.'/*');
+                if (is_array($files)) {
+                    foreach ($files as $file) {
+                        if (is_file($file) && preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', basename($file))) {
+                            $dest = $dirlogos.'/'.basename($file);
+                            if (!file_exists($dest)) {
+                                @rename($file, $dest);
+                            }
+                        }
+                    }
+                }
             }
         }
 

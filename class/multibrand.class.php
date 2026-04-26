@@ -1,5 +1,5 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.1.3
+/* MultiBrands Module for Dolibarr - v1.1.4
  * http://www.atlasbase.net
  */
 
@@ -233,9 +233,14 @@ class MultiBrand extends CommonObject
         }
 
         if ($this->logo) {
-            $logoPath = DOL_DATA_ROOT.'/multibrands/brands/'.$this->logo;
+            $logoPath = DOL_DATA_ROOT.'/multibrands/brands/logos/'.$this->logo;
             if (file_exists($logoPath)) {
                 @unlink($logoPath);
+            }
+            // Also check old location for cleanup
+            $oldLogoPath = DOL_DATA_ROOT.'/multibrands/brands/'.$this->logo;
+            if (file_exists($oldLogoPath)) {
+                @unlink($oldLogoPath);
             }
         }
 
@@ -297,7 +302,16 @@ class MultiBrand extends CommonObject
     public function getLogoPath()
     {
         if (empty($this->logo)) return '';
-        return DOL_DATA_ROOT.'/multibrands/brands/'.$this->logo;
+        $path = DOL_DATA_ROOT.'/multibrands/brands/logos/'.$this->logo;
+        if (file_exists($path)) {
+            return $path;
+        }
+        // Backward compatibility: check old location
+        $oldPath = DOL_DATA_ROOT.'/multibrands/brands/'.$this->logo;
+        if (file_exists($oldPath)) {
+            return $oldPath;
+        }
+        return $path;
     }
 
     /**
@@ -334,7 +348,7 @@ class MultiBrand extends CommonObject
             $filePath = __DIR__.'/../core/modules/'.$type.'/doc/'.$fileName;
 
             $content = "<?php\n";
-            $content .= "/* MultiBrands Module for Dolibarr - v1.1.3\n";
+            $content .= "/* MultiBrands Module for Dolibarr - v1.1.4\n";
             $content .= " * Auto-generated PDF model for brand: ".$this->code."\n";
             $content .= " * http://www.atlasbase.net\n";
             $content .= " */\n\n";
