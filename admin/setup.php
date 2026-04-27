@@ -1,5 +1,5 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.2.1
+/* MultiBrands Module for Dolibarr - v1.2.8
  * http://www.atlasbase.net
  *
  * This program is free software; you can redistribute it and/or modify
@@ -108,7 +108,8 @@ if ($action == 'add') {
         $brand->active = GETPOST('active', 'int') ? 1 : 0;
 
         // Logo upload
-        if (!empty($_FILES['logo']['tmp_name'])) {
+        if (!empty($_FILES['logo']['name'])) {
+            dol_syslog('MultiBrands setup: logo upload attempt name='.$_FILES['logo']['name'].' error='.$_FILES['logo']['error'].' tmp_name='.$_FILES['logo']['tmp_name']);
             if ($_FILES['logo']['error'] !== UPLOAD_ERR_OK) {
                 $uploadErrors = array(
                     UPLOAD_ERR_INI_SIZE => 'ErrorUploadIniSize',
@@ -120,7 +121,10 @@ if ($action == 'add') {
                     UPLOAD_ERR_EXTENSION => 'ErrorUploadExtension',
                 );
                 $errKey = isset($uploadErrors[$_FILES['logo']['error']]) ? $uploadErrors[$_FILES['logo']['error']] : 'ErrorFileUploadFailed';
-                setEventMessages($langs->trans($errKey), null, 'errors');
+                setEventMessages($langs->trans($errKey).' (PHP error code: '.$_FILES['logo']['error'].')', null, 'errors');
+                $error++;
+            } elseif (empty($_FILES['logo']['tmp_name'])) {
+                setEventMessages($langs->trans("ErrorFileUploadFailed").' — tmp_name is empty', null, 'errors');
                 $error++;
             } else {
                 $finfo = finfo_open(FILEINFO_MIME_TYPE);
@@ -131,10 +135,10 @@ if ($action == 'add') {
                 $allowed_ext = array('jpg', 'jpeg', 'png', 'gif', 'webp');
 
                 if (!in_array($mime, $allowed) || !in_array(strtolower($ext), $allowed_ext)) {
-                    setEventMessages($langs->trans("ErrorInvalidImageFile"), null, 'errors');
+                    setEventMessages($langs->trans("ErrorInvalidImageFile").' (MIME: '.$mime.', ext: '.$ext.')', null, 'errors');
                     $error++;
                 } elseif ($_FILES['logo']['size'] > 2097152) {
-                    setEventMessages($langs->trans("ErrorFileTooLarge"), null, 'errors');
+                    setEventMessages($langs->trans("ErrorFileTooLarge").' (max 2MB)', null, 'errors');
                     $error++;
                 } else {
                     $dir = DOL_DATA_ROOT.'/multibrands/brands/logos';
@@ -148,8 +152,9 @@ if ($action == 'add') {
                         $destfile = $dir.'/'.$brand->code.'_'.dol_sanitizeFileName($_FILES['logo']['name']);
                         if (move_uploaded_file($_FILES['logo']['tmp_name'], $destfile)) {
                             $brand->logo = $brand->code.'_'.dol_sanitizeFileName($_FILES['logo']['name']);
+                            dol_syslog('MultiBrands setup: logo uploaded to '.$destfile);
                         } else {
-                            setEventMessages($langs->trans("ErrorFileUploadFailed"), null, 'errors');
+                            setEventMessages($langs->trans("ErrorFileUploadFailed").' — move_uploaded_file() returned false', null, 'errors');
                             $error++;
                         }
                     }
@@ -224,7 +229,8 @@ if ($action == 'update' && $id > 0) {
                 }
             }
 
-            if (!empty($_FILES['logo']['tmp_name'])) {
+            if (!empty($_FILES['logo']['name'])) {
+                dol_syslog('MultiBrands setup: logo upload attempt (update) name='.$_FILES['logo']['name'].' error='.$_FILES['logo']['error'].' tmp_name='.$_FILES['logo']['tmp_name']);
                 if ($_FILES['logo']['error'] !== UPLOAD_ERR_OK) {
                     $uploadErrors = array(
                         UPLOAD_ERR_INI_SIZE => 'ErrorUploadIniSize',
@@ -236,7 +242,10 @@ if ($action == 'update' && $id > 0) {
                         UPLOAD_ERR_EXTENSION => 'ErrorUploadExtension',
                     );
                     $errKey = isset($uploadErrors[$_FILES['logo']['error']]) ? $uploadErrors[$_FILES['logo']['error']] : 'ErrorFileUploadFailed';
-                    setEventMessages($langs->trans($errKey), null, 'errors');
+                    setEventMessages($langs->trans($errKey).' (PHP error code: '.$_FILES['logo']['error'].')', null, 'errors');
+                    $error++;
+                } elseif (empty($_FILES['logo']['tmp_name'])) {
+                    setEventMessages($langs->trans("ErrorFileUploadFailed").' — tmp_name is empty', null, 'errors');
                     $error++;
                 } else {
                     $finfo = finfo_open(FILEINFO_MIME_TYPE);
@@ -247,10 +256,10 @@ if ($action == 'update' && $id > 0) {
                     $allowed_ext = array('jpg', 'jpeg', 'png', 'gif', 'webp');
 
                     if (!in_array($mime, $allowed) || !in_array(strtolower($ext), $allowed_ext)) {
-                        setEventMessages($langs->trans("ErrorInvalidImageFile"), null, 'errors');
+                        setEventMessages($langs->trans("ErrorInvalidImageFile").' (MIME: '.$mime.', ext: '.$ext.')', null, 'errors');
                         $error++;
                     } elseif ($_FILES['logo']['size'] > 2097152) {
-                        setEventMessages($langs->trans("ErrorFileTooLarge"), null, 'errors');
+                        setEventMessages($langs->trans("ErrorFileTooLarge").' (max 2MB)', null, 'errors');
                         $error++;
                     } else {
                         $dir = DOL_DATA_ROOT.'/multibrands/brands/logos';
@@ -265,8 +274,9 @@ if ($action == 'update' && $id > 0) {
                                 if ($old_logo && $old_logo != $brand->logo) {
                                     @unlink($dir.'/'.$old_logo);
                                 }
+                                dol_syslog('MultiBrands setup: logo uploaded (update) to '.$destfile);
                             } else {
-                                setEventMessages($langs->trans("ErrorFileUploadFailed"), null, 'errors');
+                                setEventMessages($langs->trans("ErrorFileUploadFailed").' — move_uploaded_file() returned false', null, 'errors');
                                 $error++;
                             }
                         }
@@ -304,7 +314,7 @@ if ($action == 'repair_extrafields') {
     } else {
         require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
         $extrafields = new ExtraFields($db);
-        $param = array('options' => array('multibrands_brands:label:code::active=1 AND entity=$ENTITY$' => ''));
+        $param = array('options' => array('multibrands_brands:label:rowid::active=1' => ''));
         $targets = array(
             'propal' => 'Brand',
             'societe' => 'Default Brand',
@@ -423,7 +433,9 @@ if ($action == 'create' || $action == 'edit') {
     if ($brand->logo) {
         $logoPath = DOL_DATA_ROOT.'/multibrands/brands/logos/'.$brand->logo;
         if (file_exists($logoPath)) {
-            print '<br><img src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=multibrands&file='.urlencode($brand->logo).'&cache=0&entity='.((int)$conf->entity).'" style="max-height:60px; margin-top:5px;">';
+            $mime = mime_content_type($logoPath);
+            $data = base64_encode(file_get_contents($logoPath));
+            print '<br><img src="data:'.$mime.';base64,'.$data.'" style="max-height:60px; margin-top:5px;">';
         } else {
             print '<br><span class="warning">'.$langs->trans("LogoFileMissing").': '.dol_escape_htmltag($brand->logo).'</span>';
         }
@@ -612,7 +624,9 @@ if ($action == 'create' || $action == 'edit') {
                 if ($obj->logo) {
                     $logoPath = DOL_DATA_ROOT.'/multibrands/brands/logos/'.$obj->logo;
                     if (file_exists($logoPath)) {
-                        print '<img src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=multibrands&file='.urlencode($obj->logo).'&cache=0&entity='.((int)$conf->entity).'" style="max-height:40px;">';
+                        $mime = mime_content_type($logoPath);
+                        $data = base64_encode(file_get_contents($logoPath));
+                        print '<img src="data:'.$mime.';base64,'.$data.'" style="max-height:40px;">';
                     } else {
                         print '<span class="warning">'.$langs->trans("LogoFileMissing").'</span>';
                     }

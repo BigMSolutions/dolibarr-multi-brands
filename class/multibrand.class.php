@@ -1,5 +1,5 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.2.1
+/* MultiBrands Module for Dolibarr - v1.2.8
  * http://www.atlasbase.net
  */
 
@@ -356,7 +356,7 @@ class MultiBrand extends CommonObject
                 $filePath = __DIR__.'/../core/modules/'.$type.'/doc/'.$fileName;
 
                 $content = "<?php\n";
-                $content .= "/* MultiBrands Module for Dolibarr - v1.2.1\n";
+                $content .= "/* MultiBrands Module for Dolibarr - v1.2.8\n";
                 $content .= " * Auto-generated PDF model for brand: ".$this->code."\n";
                 $content .= " * http://www.atlasbase.net\n";
                 $content .= " */\n\n";

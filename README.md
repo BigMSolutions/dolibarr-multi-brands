@@ -1,4 +1,4 @@
-# MultiBrands Module for Dolibarr — v1.2.1
+# MultiBrands Module for Dolibarr — v1.2.8
 
 **Author:** atlasbase.net  
 **License:** GPL v3+  
@@ -219,8 +219,8 @@ multibrands/
 
 | Version | Date | Changes |
 |---------|------|---------|
-| **v1.2.1** | 2026-04-26 | Fixed extrafield visibility (`list=1`, `printable=1`); fixed `langfile` reference (`multibrands@multibrands`); fixed invoice/order model discovery (load abstract parent before extending); fixed menu URL stuck on old `multi-brands` path; added PRG redirect after Repair Extrafields; bumped all model files to load `modules_*.php` abstract before concrete class |
-| **v1.2.1** | 2026-04-26 | Renamed module folder from `multi-brands` to `multibrands`; fixed model discovery (added `models => 1` to module_parts); bumped `$this->name` to match folder; hardcoded `MAIN_MODULE_MULTIBRANDS` constant; menu URL updated to `/custom/multibrands/` |
+| **v1.2.8** | 2026-04-26 | Fixed extrafield visibility (`list=1`, `printable=1`); fixed `langfile` reference (`multibrands@multibrands`); fixed invoice/order model discovery (load abstract parent before extending); fixed menu URL stuck on old `multi-brands` path; added PRG redirect after Repair Extrafields; bumped all model files to load `modules_*.php` abstract before concrete class |
+| **v1.2.8** | 2026-04-26 | Renamed module folder from `multi-brands` to `multibrands`; fixed model discovery (added `models => 1` to module_parts); bumped `$this->name` to match folder; hardcoded `MAIN_MODULE_MULTIBRANDS` constant; menu URL updated to `/custom/multibrands/` |
 | **v1.1.5** | 2026-04-25 | Dolibarr v23 support: `pdf_cyan_branded` template; fixed logo preview (`cache` + `entity` params); fixed PDF logo path (logos subdirectory); dynamic per-brand PDF model generation |
 | **v1.1.0** | — | Complete rewrite: bulletproof includes, diagnostic tool, all document types |
 | **v1.0.2** | — | Fixed include path issues |

@@ -1,9 +1,10 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.2.1
+/* MultiBrands Module for Dolibarr - v1.2.8
  * http://www.atlasbase.net
  */
 
 require_once DOL_DOCUMENT_ROOT.'/core/triggers/dolibarrtriggers.class.php';
+require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
 dol_include_once('/multibrands/class/multibrand.class.php');
 
 /**
@@ -14,7 +15,7 @@ class InterfaceMultiBrandsWorkflow extends DolibarrTriggers
     public $name = 'MultiBrandsWorkflow';
     public $family = 'multibrands';
     public $description = "Auto-assign brand to proposals, invoices, orders from thirdparty default";
-    public $version = '1.2.1';
+    public $version = '1.2.8';
     public $picto = 'label';
     // Handled events: PROPAL_CREATE, PROPAL_MODIFY, FACTURE_CREATE, FACTURE_MODIFY, COMMANDE_CREATE, COMMANDE_MODIFY
 
@@ -23,35 +24,32 @@ class InterfaceMultiBrandsWorkflow extends DolibarrTriggers
         global $db;
         if (empty($conf->multibrands->enabled)) return 0;
 
-        $brand = new MultiBrand($db);
-        $element = '';
-
         switch ($action) {
             case 'PROPAL_CREATE':
-            case 'PROPAL_MODIFY':
-                $element = 'propal';
-                break;
+            case 'BILL_CREATE':
             case 'FACTURE_CREATE':
-            case 'FACTURE_MODIFY':
-                $element = 'facture';
-                break;
+            case 'ORDER_CREATE':
             case 'COMMANDE_CREATE':
-            case 'COMMANDE_MODIFY':
-                $element = 'commande';
                 break;
             default:
                 return 0;
         }
 
-        if (empty($object->array_options['options_brand_code']) && !empty($object->socid)) {
-            $defaultBrand = $brand->getBrandForThirdparty($object->socid);
-            if (!$defaultBrand) $defaultBrand = $brand->getDefaultCode();
-            if ($defaultBrand) {
-                $object->array_options['options_brand_code'] = $defaultBrand;
-                $sql = "UPDATE ".MAIN_DB_PREFIX.$element."_extrafields SET brand_code = '".$db->escape($defaultBrand)."' WHERE fk_object = ".((int)$object->id);
-                $resql = $db->query($sql);
-                if (!$resql) {
-                    dol_syslog('InterfaceMultiBrandsWorkflow::runTrigger error: '.$db->lasterror(), LOG_ERR);
+        if (!empty($object->socid)) {
+            if (empty($object->array_options) || empty($object->array_options['options_brand_code'])) {
+                $thirdparty = new Societe($db);
+                if ($thirdparty->fetch($object->socid) > 0) {
+                    $thirdparty->fetch_optionals();
+                    if (!empty($thirdparty->array_options['options_brand_code'])) {
+                        if (empty($object->array_options)) {
+                            $object->array_options = array();
+                        }
+                        $object->array_options['options_brand_code'] = $thirdparty->array_options['options_brand_code'];
+                        $res = $object->insertExtraFields();
+                        if ($res < 0) {
+                            dol_syslog('InterfaceMultiBrandsWorkflow::runTrigger insertExtraFields failed: '.$object->error, LOG_ERR);
+                        }
+                    }
                 }
             }
         }

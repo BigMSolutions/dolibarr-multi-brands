@@ -1,12 +1,12 @@
 <?php
-/* MultiBrands Module for Dolibarr - v1.2.1
+/* MultiBrands Module for Dolibarr - v1.2.8
  * http://www.atlasbase.net
  */
 
 /**
  * \file    multibrands/core/modules/modMultiBrands.class.php
  * \ingroup multibrands
- * \brief   MultiBrands module descriptor v1.2.1
+ * \brief   MultiBrands module descriptor v1.2.8
  */
 
 require_once DOL_DOCUMENT_ROOT.'/core/modules/DolibarrModules.class.php';
@@ -25,7 +25,7 @@ class modMultiBrands extends DolibarrModules
         $this->name = 'multibrands';
         $this->description = "Issue quotations and documents under multiple brands / DBAs from a single company";
         $this->descriptionlong = "Define multiple brand identities (logo, name, colors, address, legal text) and dynamically apply them to proposals, invoices, orders and other PDF documents based on a custom field selection.";
-        $this->version = '1.2.1';
+        $this->version = '1.2.8';
         $this->const_name = 'MAIN_MODULE_MULTIBRANDS';
         $this->picto = 'label';
 
@@ -224,7 +224,7 @@ class modMultiBrands extends DolibarrModules
         $extrafields = new ExtraFields($this->db);
 
         // Use 'sellist' type so the dropdown is populated dynamically from the brands table
-        $param = array('options' => array('multibrands_brands:label:code::active=1 AND entity=$ENTITY$' => ''));
+        $param = array('options' => array('multibrands_brands:label:rowid::active=1' => ''));
 
         $targets = array(
             'propal' => 'Brand',

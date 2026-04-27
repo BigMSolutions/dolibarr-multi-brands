@@ -1,5 +1,5 @@
 <?php
-/* MultiBrands Module Diagnostic Tool - v1.2.1
+/* MultiBrands Module Diagnostic Tool - v1.2.8
  * Place this file in your Dolibarr root and access via browser.
  * It will try to locate the multi-brands module and report status.
  */
@@ -34,7 +34,7 @@ if (php_sapi_name() !== 'cli'
     </style>
 </head>
 <body>
-<h1>MultiBrands Module Diagnostic v1.2.1</h1>
+<h1>MultiBrands Module Diagnostic v1.2.8</h1>
 
 <?php
 function test($label, $condition, $errorMsg = '') {
@@ -193,6 +193,60 @@ if (!empty($db) && is_object($db)) {
     }
 }
 
+// 6b. Extrafield config check
+echo "<h2>6b. Extrafield Config Check</h2>";
+if (!empty($db) && is_object($db)) {
+    $elements = array('societe', 'propal', 'facture', 'commande');
+    foreach ($elements as $element) {
+        $sql = "SELECT name, type, param, list, printable, langfile"
+            ." FROM ".MAIN_DB_PREFIX."extrafields"
+            ." WHERE name = 'brand_code' AND elementtype = '".$db->escape($element)."'";
+        $resql = $db->query($sql);
+        if ($resql && $db->num_rows($resql)) {
+            $obj = $db->fetch_object($resql);
+            echo "<h3>$element</h3>";
+            echo "<pre>";
+            echo "type: " . htmlspecialchars($obj->type) . "\n";
+            echo "list: " . htmlspecialchars($obj->list) . "\n";
+            echo "printable: " . htmlspecialchars($obj->printable) . "\n";
+            echo "langfile: " . htmlspecialchars($obj->langfile) . "\n";
+            echo "param: " . htmlspecialchars($obj->param) . "\n";
+            echo "</pre>";
+            
+            // Check for the $ENTITY$ bug
+            if (strpos($obj->param, '$ENTITY$') !== false) {
+                test("Param contains \$ENTITY$ bug", false, "Disable/re-enable the module to fix this");
+            } elseif (strpos($obj->param, 'rowid') !== false) {
+                test("Param uses rowid", true);
+            } else {
+                test("Param uses code (old format)", false, "Disable/re-enable the module to upgrade to rowid");
+            }
+        } else {
+            test("Extrafield 'brand_code' for $element", false, "Not found in database");
+        }
+    }
+}
+
+// 6c. Sellist query test
+echo "<h2>6c. Sellist Query Test</h2>";
+if (!empty($db) && is_object($db)) {
+    $sql = "SELECT rowid, label FROM ".MAIN_DB_PREFIX."multibrands_brands WHERE active = 1";
+    $resql = $db->query($sql);
+    if ($resql) {
+        $num = $db->num_rows($resql);
+        test("Direct query returns rows", $num > 0, $num . " active brand(s)");
+        if ($num > 0) {
+            echo "<table><tr><th>rowid</th><th>label</th></tr>";
+            while ($obj = $db->fetch_object($resql)) {
+                echo "<tr><td>" . ((int)$obj->rowid) . "</td><td>" . htmlspecialchars($obj->label) . "</td></tr>";
+            }
+            echo "</table>";
+        }
+    } else {
+        test("Direct query", false, $db->lasterror());
+    }
+}
+
 // 7. Paths Info
 echo "<h2>7. System Paths</h2>";
 echo "<pre>";
@@ -235,6 +289,6 @@ if (!empty($logFile) && file_exists($logFile) && is_readable($logFile)) {
 ?>
 
 <hr>
-<p style="color:#888;">MultiBrands Diagnostic v1.2.1 — If this page loads, PHP is working. If sections show errors, those are your clues.</p>
+<p style="color:#888;">MultiBrands Diagnostic v1.2.8 — If this page loads, PHP is working. If sections show errors, those are your clues.</p>
 </body>
 </html>
